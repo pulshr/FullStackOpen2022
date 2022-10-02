@@ -1,43 +1,56 @@
-import { useState } from 'react'
+import { useState,useEffect } from 'react'
 
-import Contact from './Components/Contact'
-import Header from './Components/Header'
-import Search from './Components/Search'
-import AddContact from './Components/AddContact'
+import Contact from './components/Contact'
+import Header from './components/Header'
+import Search from './components/Search'
+import AddContact from './components/AddContact'
 
-const App = (props) => {
-  const [contacts, setContacts] = useState(props.contacts)
+import contactService from './services/contacts'
+
+const App = () => {
+  const [contacts, setContacts] = useState([])
   const [newContact, setNewContact] = useState('')
   const [newNumber, setNewNumber] = useState(0)
   const [newSearch, setNewSearch] = useState('')
 
-  //Add Contact to Array
-  const addContact = (event) => {
-    event.preventDefault()
-    if(props.contacts.map(contact=>contact.name).includes(newContact)) {
-      alert(`${newContact} is already added to phonebook`);
-    } else {
-      const contactObject = {
-        name: newContact,
-        number: newNumber,
-        id: contacts.length + 1,
-      }
-      let updatedContacts = contacts;
-      updatedContacts.push(contactObject);
-      setContacts(updatedContacts);
-      setNewContact('');
-      setNewNumber(0);
+  useEffect(()=>{
+    contactService.getAll()
+      .then(initialContacts => {
+        setContacts(initialContacts)
+      })
+  },[])
+
+  const addContact = () => {
+    const contactObject = {
+      name: newContact,
+      number: newNumber,
     }
+    contactService.create(contactObject)
+      .then(returnedContact=>{
+        setContacts(contacts.concat(returnedContact))
+        setNewContact('')
+        setNewNumber(0)
+        setNewSearch('')
+      })
+  }
+
+  const deleteContactA = (id) => {
+    contactService.deleteContact(id)
+      .then(initialContacts => {
+        setContacts(initialContacts)
+      })
   }
 
   //Get New Contact from Input
   const handleContactChange = (event) => {
     setNewContact(event.target.value)
+    setContacts(contacts)
   }
 
   //Get New Number from Input
   const handleNumberChange = (event) => {
     setNewNumber(event.target.value)
+    setContacts(contacts)
   }
   
   //Get Results
@@ -53,8 +66,9 @@ const App = (props) => {
       <AddContact addContact={addContact} newContact={newContact} handleContactChange={handleContactChange} newNumber={newNumber} handleNumberChange={handleNumberChange}/>
       <Header text="Numbers"/>
       {
-        props.contacts.filter(contact=>(contact.name.includes(newSearch))).map(contact=><Contact key={contact.id} name={contact.name} number={contact.number}/>)
+        contacts.filter(contact=>(contact.name.includes(newSearch))).map(contact=><Contact key={contact.id} name={contact.name} number={contact.number}/>)
       }
+      <button onClick={deleteContactA}>deleteAll</button>
     </div>
   )
 }

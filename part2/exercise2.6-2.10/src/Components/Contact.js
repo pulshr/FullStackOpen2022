@@ -1,6 +1,6 @@
 const Contact = (props) => {
     return (
-      <li>{props.name} {props.number}</li>
+      <p>{props.name} {props.number} <button>delete</button></p>
     )
   }
   
