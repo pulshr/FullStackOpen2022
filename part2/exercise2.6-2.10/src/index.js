@@ -1,9 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import axios from 'axios'
+
 import App from './App';
 
-const contacts = []
+axios.get('http://localhost:3001/persons').then(response => {
+  const contacts = response.data;
+  ReactDOM.createRoot(document.getElementById('root')).render(<App contacts={contacts}/>)
+})
   
-  ReactDOM.createRoot(document.getElementById('root')).render(
-    <App contacts={contacts} />
-  )
